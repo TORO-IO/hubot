@@ -1,1 +1,4 @@
-["play.coffee"]
+[
+  "play",
+  "hubot-spotify"
+]
