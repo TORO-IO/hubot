@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" {% if page.slug == "login" -%}class="login"{% endif -%}>
+<head>
+  <!-- Required meta tags always come first -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+  <title>
+    {% if page %}
+      {{ page.title }} - {{ page.description }}
+    {% else %}
+      BatiBot
+    {% endif %}
+  </title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css" integrity="sha384-y3tfxAZXuh4HwSYylfB+J125MxIs6mR5FOHamPBG064zB+AFeWH94NdvaCBm8qnd" crossorigin="anonymous">
+  <link rel="stylesheet" href="/spotify/styles/spotify.css">
+
+  </style>
+</head>
+<body>
+
+  {% if page.header %}
+    {% include "_includes/header.nunjucks" %}
+  {% endif %}
+
+  {% block main %}
+  {% endblock %}
+
+  {% if page.footer %}
+    {% include "_includes/footer.nunjucks" %}
+  {% endif %}
+
+  {% block scripts %}
+  {% endblock %}
+</body>
+</html>

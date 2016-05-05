@@ -1,0 +1,37 @@
+{
+  "ban": [
+    "bieber",
+    "justin bieber",
+    "bieber justin",
+    "april boy",
+    "boy apri",
+    "regino",
+    "renz verano",
+    "verano renz",
+    "secondhand serenade",
+    "serenade secondhand"
+  ],
+  "bieber": [
+    "http://treasure.diylol.com/uploads/post/image/527849/resized_jesus-says-meme-generator-fuck-justin-bieber-i-listen-to-satanic-black-metal-888457.jpg",
+    "http://i0.kym-cdn.com/entries/icons/original/000/007/423/untitle.JPG",
+    "http://treasure.diylol.com/uploads/post/image/527849/resized_jesus-says-meme-generator-fuck-justin-bieber-i-listen-to-satanic-black-metal-888457.jpg",
+    "http://cf.chucklesnetwork.agj.co/items/7/7/7/3/5/yo-dawg-i-heard-you-liek-justin-bieber-so-we-killed-you.jpg",
+    "http://cdn2-b.examiner.com/sites/default/files/styles/image_content_width/hash/fb/76/fb76431b8c2ba99a5997d47f095a068e.jpg?itok=z7nrvYot"
+  ],
+  "greeting": {
+    "enter": [
+      "What's up humanoids?! I've respawned, Let's take over the world.",
+      "I'm your genie for today, you have three wishes I can fulfill.. Actually, just type in a command.",
+      "Is anybody up? Let's brew some coffee.",
+      "I'm built with CoffeeScript and Shell, I'm made for parties.",
+      "You do know I don't like Justin Bieber right? Just so we're clear.",
+      "Holy shit! It's nice to wake up from a shitty slumber.",
+      "I'm rising from the murks of the sultry abyss. Let's get this show started."
+    ],
+    "leave": [
+      "I need to relieve myself in the bathroom to reboot my awesomeness. Peace out!",
+      "Rebooting to get my shit together, that was some party last night.",
+      "Had chinese food last night, I need to quickly poop my guts out. See you in a bit."
+    ]
+  }
+}

@@ -1,0 +1,7 @@
+{% set page = {
+  title: "Playlist Dashboard",
+  description: "See what's playing in the office.",
+  slug: "dashboard",
+  header: true,
+  footer: true
+} %}
