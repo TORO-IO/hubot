@@ -29,28 +29,26 @@ sh          = require 'sh'
 player   = "#{path.join process.cwd(), 'scripts/spotify.scpt'}"
 filepath = "#{path.join process.cwd(), 'app/spotify/views'}"
 template = new nunjucks.Environment(new nunjucks.FileSystemLoader(filepath))
-
 template.addFilter 'json', (str) ->
   return JSON.stringify str, null, 2
 
 config =
-  # process.env.HUBOT_HIPCHAT_ROOMS
-  room: '375587_playlist@conf.hipchat.com'
   spotify:
-    # process.env.SPOTIFY_CLIENT_ID
-    clientId:     'af83782185e14a2e9195f9aca2e1cd70'
-    # process.env.SPOTIFY_CLIENT_SECRET
-    clientSecret: '9dc596e6f4e34b1ba5b22ca30c6f3961'
-    # process.env.SPOTIFY_REDIRECT_URI
-    redirectUri:  "http://127.0.0.1:8080/spotify/callback"
+    clientId: process.env.SPOTIFY_CLIENT_ID
+    clientSecret: process.env.SPOTIFY_CLIENT_SECRET
+    redirectUri: "http://#{process.env.EXPRESS_BIND_ADDRESS or process.env.BIND_ADDRESS or '127.0.0.1'}:#{process.env.EXPRESS_PORT or process.env.PORT or 8080}/spotify/callback"
   scopes: [
     'user-follow-read'
     'user-library-read'
+    'playlist-read-private'
+    'playlist-modify-private'
     'playlist-modify-public'
     'playlist-read-collaborative'
   ]
 
 module.exports = (robot) ->
+  # Rooms joined in
+  rooms = process.env.HUBOT_HIPCHAT_ROOMS
 
   # Initialize Robot Static Directory
   robot.router.use express.static "#{path.join process.cwd(), 'app/spotify/assets'}"
@@ -92,7 +90,6 @@ module.exports = (robot) ->
   util.boot = (callback) ->
     spotify.setAccessToken  robot.brain.get('spotify') and robot.brain.get('spotify').access_token
     spotify.setRefreshToken robot.brain.get('spotify') and robot.brain.get('spotify').refresh_token
-
     callback and callback
     return
 
@@ -119,6 +116,26 @@ module.exports = (robot) ->
         return
     else
       callback and callback {bieberAlert: true}, {results: util.context('bieber')}
+      return
+
+  ###
+  # @name getTrack
+  # @desc
+  # @param {String}
+  ###
+  getTrack = (query, callback) ->
+    spotify.getTracks(query).then ((data)->
+      result =
+        name: data.body.name
+        link: data.body.external_urls.spotify
+        album: data.body.album.name
+        artist: data.body.artists[0].name
+      console.log data.body
+      callback and callback null, result
+    ), (err) ->
+      callback and callback err, null
+      return
+
   ###
   # @name PLayList
   # @desc Function to perform CRUD operations to Playlist
@@ -126,10 +143,38 @@ module.exports = (robot) ->
   # @param {Function} callback
   ###
   playlist = (query, callback) ->
+    user = robot.brain.get('profile')  and robot.brain.get('profile').id
+    list = robot.brain.get('playlist') and robot.brain.get('playlist').id
+    item = query.split(',')
+
+    util.boot()
+
+    if user and list
+      spotify.addTracksToPlaylist(user, list, item).then ((data) ->
+        robot.brain.mergeData 'playlist', data.body
+        robot.emit 'track:get', query, (err, tracks) ->
+          if !err
+            callback and callback null, item
+          else
+            callback and callback err, null
+      ), (err) ->
+        if err and err.statusCode == 401
+          robot.emit 'reload', (error, auth) ->
+            if err
+              callback and callback error, null
+            else
+              playlist query, callback and callback null, result
+        else
+          callback and callback err, null
+        return
     return
 
-
-
+  ###
+  # @name setplaylist
+  # @desc function that sets the playlist
+  # @param {String} query
+  # @param {Function} callback
+  ###
   setplaylist = (query, callback) ->
     playlist = query.match /(user:(\d+|\w+)|playlist:[A-Za-z0-9_.]+)/g
     spotifyUsername = playlist[0].replace /(user\:)/g, ''
@@ -139,9 +184,11 @@ module.exports = (robot) ->
 
     spotify.getPlaylist(spotifyUsername, spotifyPlaylist, {market: 'PH'}).then ((data) ->
       result =
+        id: data.body.id
         name: data.body.name
         desc: if data.body.description then data.body.description else "The playlist doesn't have a description."
         link: data.body.external_urls.spotify
+        uri:  data.body.uri
 
       if data.body.collaborative != true
         result.collaborative = false
@@ -214,15 +261,19 @@ module.exports = (robot) ->
   # Listening for Search Events
   robot.on 'search', search
 
-  # Listening for Playlist Events
-  robot.on 'playlist', playlist
+  # Listening for Track Events
+  robot.on 'track:get', getTrack
 
-  # Listening for Setting a Playlist
+  # Listening for Add to Playlist Events
+  robot.on 'playlist:add', playlist
+
+  # Listening for Setting a Playlist Events
   robot.on 'playlist:set', setplaylist
 
   # Listening for Refresh Token Request
   robot.on 'reload', reload
 
+  # Attach Spotify Access Tokens and such..
   robot.on 'boot', util.boot
 
   # Router Middleware, they go here
@@ -349,11 +400,14 @@ module.exports = (robot) ->
 
   # Bot Respawned!
   robot.enter (res) ->
-    robot.messageRoom config.room, res.random util.context('greet').enter
+    notify = rooms.split(',')
+    for i of notify
+      robot.messageRoom notify[i], res.random util.context('greet').enter
 
   # Bot Fragged!
   robot.leave (res) ->
-    robot.messageRoom config.room, res.random util.context('greet').leave
+    notify = rooms.split(',')
+    robot.messageRoom notify[i], res.random util.context('greet').leave
 
 
   ###
@@ -385,17 +439,24 @@ module.exports = (robot) ->
         #   res.send "F"
         if subcom == 'set:'
           robot.emit 'playlist:set', query, (err, data) ->
+            notify = rooms.split(',')
             if err and err.statusCode == 401
             else if err and err.statusCode == 200
               res.reply "I don't think that playlist exists, it might, ..outerspace"
             else
-              if !res.message.room
-                res.reply "Okay, I've set the playlist you requested. Here are the details:"
-                res.send "/quote #{data.message}"
-              else
-                robot.messageRoom config.room, "Hello @all a new playlist has been set, check it out:"
-                robot.messageRoom config.room, "/quote #{data.message}"
+              if res.message.room == undefined
+                for i of notify
+                  robot.messageRoom notify[i], "Hello @all a new playlist has been set, check it out:"
+                  robot.messageRoom notify[i], "/quote #{data.message}"
+              res.reply "Okay, I've set the playlist you requested. Here are the details:"
+              res.send "/quote #{data.message}"
               sh('osascript -e \'tell application "Spotify" to play track "'+query+'"\'')
+        if subcom == 'add:'
+          robot.emit 'track:get', query.split(','), (err, data) ->
+            console.log data.body
+          # robot.emit 'playlist:add', query, (err, data) ->
+          #   console.log '460', err, data
+
       when 'play'
         query = res.match[3] and res.match[3].trim()
         track = query
