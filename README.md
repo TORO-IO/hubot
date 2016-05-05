@@ -28,6 +28,11 @@ batibot current song          - Shows the current track info
 # Typically you can get a track uri or playlist uri from copying and pasting
 # from spotify app. You may use BatiBot to search for a playlist or a track
 batibot spotify play track: [ spotify:track:uri | spotify:user:name:playlist:uri ]
+
+# Set a Playlist
+# You may set a playlist where users can queue songs, if a playlist isn't a
+# collaborative one, song requests will not be queued.
+batibot spotify playlist set: [ spotify:user:name:playlist:uri ]
 ```
 
 

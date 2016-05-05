@@ -1,3 +1,23 @@
+# Author: @pongstr https://github.com/pongstr
+#
+# Description:
+#   Override Spotify PLayer Controls
+#
+# Dependencies
+#   spotify-web-api-node v2.3.0
+#
+# Configuration:
+#   SPOTIFY_CLIENT_ID       - Application Client ID.
+#   SPOTIFY_CLIENT_SECRET   - Application Client Secret.
+#   SPOTIFY_REDIRECT_URI    - OAuth Callback URI.
+#
+# Commands:
+#   batibot spotify help                                                             - Get Help Commands
+#   batibot spotify search track: <song_title - artist | spotify:track:uri>          - Search for a track.
+#   batibot spotify playlist set: <spotify:user:name:playlist:uri>                   - Set a playlist where users can queue songs to.
+#   batibot spotify playlist add: <spotify:track:uri>                                - Queue a song to playlist
+#   batibot spotify play track: <spotify:track:uri | spotify:user:name:playlist:uri> - Play a track or a playlist
+#
 
 SpotifyAPI  = require 'spotify-web-api-node'
 express     = require 'express'
