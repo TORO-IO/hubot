@@ -23,16 +23,27 @@ batibot volue <up|down|0-10>  - Volume Controls yo
 batibot mute                  - Mute the Music. Boooooo!
 batibot current song          - Shows the current track info
 
+# Spotify Help
+# Returns Hubot README.md file as code for faster copy+pasta mode
+batibot spotify help
 
-# Play a track or Playlist
-# Typically you can get a track uri or playlist uri from copying and pasting
-# from spotify app. You may use BatiBot to search for a playlist or a track
-batibot spotify play track: [ spotify:track:uri | spotify:user:name:playlist:uri ]
+# Search Track
+# Search for a track using keywords or spotify's uri
+batibot spotify search track: [Song_Title - Artist | spotify:track:uri]
+
+# Add Track to Playlist
+# Adds a track to the playlist queue
+batibot spotify playlist add: [spotify:track:uri]
 
 # Set a Playlist
 # You may set a playlist where users can queue songs, if a playlist isn't a
 # collaborative one, song requests will not be queued.
 batibot spotify playlist set: [ spotify:user:name:playlist:uri ]
+
+# Play a track or Playlist
+# Typically you can get a track uri or playlist uri from copying and pasting
+# from spotify app. You may use BatiBot to search for a playlist or a track
+batibot spotify play track: [ spotify:track:uri | spotify:user:name:playlist:uri ]
 ```
 
 
