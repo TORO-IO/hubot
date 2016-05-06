@@ -54,3 +54,42 @@ Server Info
 ---
 
 > TODO: Add server info here
+
+Getting Started
+---
+
+**Pre-requisites**
+
+1. Node.js > 0.10.x
+1. Redis Server (for bot brain info to persist)
+1. Hipchat User (for your bot)
+1. Spotify App
+1. Spotify Desktop Player
+
+**Setup Envars for HipChat adapter**
+
+> TODO: Add description for each variable
+
+```bash
+HUBOT_HIPCHAT_JID
+HUBOT_HIPCHAT_PASSWORD
+HUBOT_HIPCHAT_ROOMS
+HUBOT_HIPCHAT_JOIN_ROOMS_ON_INVITE
+HUBOT_HIPCHAT_HOST
+HUBOT_HIPCHAT_RECONNECT
+HUBOT_HIPCHAT_JOIN_PUBLIC_ROOMS
+HUBOT_LOG_LEVEL
+HUBOT_HEROKU_KEEPALIVE_URL
+```
+
+**Setup Envars for Spotify App**
+
+> TODO: Add description for each variable
+
+```bash
+SPOTIFY_CLIENT_ID
+SPOTIFY_CLIENT_SECRET
+
+EXPRESS_STATIC
+EXPRESS_PASSWORD
+```

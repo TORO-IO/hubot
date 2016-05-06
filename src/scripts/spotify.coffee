@@ -404,19 +404,19 @@ module.exports = (robot) ->
   # Commands, they go here
   # ----------------------
 
-  # Bot Respawned!
-  robot.enter (res) ->
-    notify = rooms.split(',')
-    greet  = res.random util.context('greet').enter
-    for i of notify
-      robot.messageRoom notify[i], greet
-
-  # Bot Fragged!
-  robot.leave (res) ->
-    notify = rooms.split(',')
-    greet  = res.random util.context('greet').leave
-    for i of notify
-      robot.messageRoom notify[i], greet
+  # # Bot Respawned!
+  # robot.enter (res) ->
+  #   notify = rooms.split(',')
+  #   greet  = res.random util.context('greet').enter
+  #   for i of notify
+  #     robot.messageRoom notify[i], greet
+  #
+  # # Bot Fragged!
+  # robot.leave (res) ->
+  #   notify = rooms.split(',')
+  #   greet  = res.random util.context('greet').leave
+  #   for i of notify
+  #     robot.messageRoom notify[i], greet
 
 
 
