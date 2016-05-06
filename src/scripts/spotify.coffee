@@ -72,7 +72,7 @@ module.exports = (robot) ->
     str = "\n"
     for key, track of arr
       str += "\n#{key}. #{track.name} by #{track.artists[0].name}\n"
-      str += "    add: #{robot.name} spotify playlist add #{track.uri}\n"
+      str += "    add: `#{robot.name} spotify playlist add: #{track.uri}`\n"
       str += "-----\n"
     return str
 
