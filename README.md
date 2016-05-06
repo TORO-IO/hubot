@@ -32,7 +32,8 @@ batibot spotify help
 batibot spotify search track: [Song_Title - Artist | spotify:track:uri]
 
 # Add Track to Playlist
-# Adds a track to the playlist queue
+# Adds a track to the playlist queue, you may also add multiple tracks by
+# separating them with a comma, like so: `spotify:track:abc,spotifytrack:123`
 batibot spotify playlist add: [spotify:track:uri]
 
 # Set a Playlist

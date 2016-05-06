@@ -125,15 +125,19 @@ module.exports = (robot) ->
   ###
   getTrack = (query, callback) ->
     spotify.getTracks(query).then ((data)->
-      result =
-        name: data.body.name
-        link: data.body.external_urls.spotify
-        album: data.body.album.name
-        artist: data.body.artists[0].name
-      console.log data.body
+      tracks = data.body.tracks
+      result = tracks: [], message: ""
+
+      for i of tracks
+        result.tracks.push tracks[i]
+        result.message += "\n#{tracks[i].name} by #{tracks[i].artists[0].name}\n#{tracks[i].external_urls.spotify}\n"
       callback and callback null, result
+      return
     ), (err) ->
-      callback and callback err, null
+      if err and err.statusCode == 401
+        getTrack query, callback and callback(error, tracks)
+      else
+        callback and callback err, null
       return
 
   ###
@@ -143,27 +147,29 @@ module.exports = (robot) ->
   # @param {Function} callback
   ###
   playlist = (query, callback) ->
-    user = robot.brain.get('profile')  and robot.brain.get('profile').id
-    list = robot.brain.get('playlist') and robot.brain.get('playlist').id
-    item = query.split(',')
+    user    = robot.brain.get('profile')  and robot.brain.get('profile').id
+    list    = robot.brain.get('playlist') and robot.brain.get('playlist').id
+    items   = query.split(',')
+    trackId = []
 
     util.boot()
 
+    for i of items
+      q = items[i].match /([A-Za-z0-9_.]+)$/g
+      if q.length > 0 then trackId.push q[0]
+
     if user and list
-      spotify.addTracksToPlaylist(user, list, item).then ((data) ->
+      spotify.addTracksToPlaylist(user, list, query).then ((data) ->
         robot.brain.mergeData 'playlist', data.body
-        robot.emit 'track:get', query, (err, tracks) ->
-          if !err
-            callback and callback null, item
+        robot.emit 'track:get', trackId, (error, item) ->
+          if error
+            callback and callback error, null
           else
-            callback and callback err, null
+            callback and callback null, item
       ), (err) ->
         if err and err.statusCode == 401
-          robot.emit 'reload', (error, auth) ->
-            if err
-              callback and callback error, null
-            else
-              playlist query, callback and callback null, result
+          robot.emit 'reload', () ->
+            playlistAddTrack query, callback
         else
           callback and callback err, null
         return
@@ -401,13 +407,17 @@ module.exports = (robot) ->
   # Bot Respawned!
   robot.enter (res) ->
     notify = rooms.split(',')
+    greet  = res.random util.context('greet').enter
     for i of notify
-      robot.messageRoom notify[i], res.random util.context('greet').enter
+      robot.messageRoom notify[i], greet
 
   # Bot Fragged!
   robot.leave (res) ->
     notify = rooms.split(',')
-    robot.messageRoom notify[i], res.random util.context('greet').leave
+    greet  = res.random util.context('greet').leave
+    for i of notify
+      robot.messageRoom notify[i], greet
+
 
 
   ###
@@ -419,6 +429,7 @@ module.exports = (robot) ->
     action = res.match[1] and res.match[1].trim()
     subcom = res.match[2] and res.match[2].trim()
     query  = res.match[3] and res.match[3].trim()
+    notify = rooms.split(',')
 
     switch action
       when 'help'
@@ -435,12 +446,10 @@ module.exports = (robot) ->
             res.reply "Woops! I think I shit my pants.. please try again."
             res.send res.random data.results
       when 'playlist'
-        # robot.emit 'playlist', query, (err, data) ->
-        #   res.send "F"
         if subcom == 'set:'
           robot.emit 'playlist:set', query, (err, data) ->
-            notify = rooms.split(',')
             if err and err.statusCode == 401
+              # Lets put some 401 error handler here
             else if err and err.statusCode == 200
               res.reply "I don't think that playlist exists, it might, ..outerspace"
             else
@@ -452,10 +461,19 @@ module.exports = (robot) ->
               res.send "/quote #{data.message}"
               sh('osascript -e \'tell application "Spotify" to play track "'+query+'"\'')
         if subcom == 'add:'
-          robot.emit 'track:get', query.split(','), (err, data) ->
-            console.log data.body
-          # robot.emit 'playlist:add', query, (err, data) ->
-          #   console.log '460', err, data
+          robot.emit 'playlist:add', query, (err, data) ->
+            if err and err.statusCode == 401
+              # Lets put some 401 error handler here
+            else if err and err.statusCode == 200
+              res.reply "I don't think those track(s) exists, it might, ..outerspace"
+            else
+              console.log 470, data
+              if res.message.room == undefined
+                for i of notify
+                  robot.messageRoom notify[i], "New track(s) have been added to Playlist #{robot.brain.get('playlist').name}"
+                  robot.messageRoom notify[i], "/quote #{data.message}"
+              res.reply "Okay, the track(s) you requested have been added:"
+              res.send "/quote #{data.message}"
 
       when 'play'
         query = res.match[3] and res.match[3].trim()
